@@ -22,7 +22,7 @@ Plotting::Plotting(double Ts,PathToJson path)
 param_(Param(path.param_path))
 {
 }
-void Plotting::plotRun(const std::list<MPCReturn> &log, const TrackPos &track_xy) const
+void Plotting::plotRun(const std::list<MPCReturn> &log, const TrackPos &track_xy, const std::vector<Obstacle>& obs) const
 {
 
     std::vector<double> plot_xc(track_xy.X.data(),track_xy.X.data() + track_xy.X.size());
@@ -94,6 +94,9 @@ void Plotting::plotRun(const std::list<MPCReturn> &log, const TrackPos &track_xy
     plt::plot(plot_xi,plot_yi,"k-");
     plt::plot(plot_xo,plot_yo,"k-");
     plt::plot(plot_x,plot_y,"b-");
+    for (const auto& ob : obs){
+        plotBox(ob.state());
+    }
     plt::axis("equal");
     plt::xlabel("X [m]");
     plt::ylabel("Y [m]");
@@ -158,7 +161,7 @@ void Plotting::plotRun(const std::list<MPCReturn> &log, const TrackPos &track_xy
     plt::show();
 
 }
-void Plotting::plotSim(const std::list<MPCReturn> &log, const TrackPos &track_xy) const
+void Plotting::plotSim(const std::list<MPCReturn> &log, const TrackPos &track_xy, const std::vector<Obstacle>& obs) const
 {
     std::vector<double> plot_xc(track_xy.X.data(),track_xy.X.data() + track_xy.X.size());
     std::vector<double> plot_yc(track_xy.Y.data(),track_xy.Y.data() + track_xy.Y.size());
@@ -186,12 +189,21 @@ void Plotting::plotSim(const std::list<MPCReturn> &log, const TrackPos &track_xy
         plt::plot(plot_xi,plot_yi,"k-");
         plt::plot(plot_xo,plot_yo,"k-");
         plotBox(log_i.mpc_horizon[0].xk);
+        for (const auto& ob : obs){
+            plotBox(ob.state());
+        }
         plt::plot(plot_x,plot_y,"b-");
         plt::axis("equal");
         plt::xlim(-2,2);
         plt::ylim(-2,2);
         plt::pause(0.01);
     }
+}
+
+void Plotting::plotBox(double x, double y) const
+{
+    State dummy_state{x, y};
+    plotBox(dummy_state);
 }
 
 void Plotting::plotBox(const State &x0) const

@@ -25,18 +25,20 @@
 #include <vector>
 #include <MPC/mpc.h>
 #include <Model/model.h>
+#include "Obstacle/Obstacle.h"
 
 namespace plt = matplotlibcpp;
 
 namespace mpcc {
 class Plotting {
 public:
-    void plotRun(const std::list<MPCReturn> &log, const TrackPos &track_xy) const;
-    void plotSim(const std::list<MPCReturn> &log, const TrackPos &track_xy) const;
+    void plotRun(const std::list<MPCReturn> &log, const TrackPos &track_xy, const std::vector<Obstacle>& obs) const;
+    void plotSim(const std::list<MPCReturn> &log, const TrackPos &track_xy, const std::vector<Obstacle>& obs) const;
 
     Plotting(double Ts, PathToJson path);
 
 private:
+    void plotBox(double x, double y) const;
     void plotBox(const State &x0) const;
 
     Model model_;

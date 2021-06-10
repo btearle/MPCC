@@ -23,6 +23,7 @@
 #include "Model/integrator.h"
 #include "Params/track.h"
 #include "Plotting/plotting.h"
+#include "Obstacle/Obstacle.h"
 
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -63,14 +64,27 @@ int main() {
     mpc.setTrack(track_xy.X,track_xy.Y);
     const double phi_0 = std::atan2(track_xy.Y(1) - track_xy.Y(0),track_xy.X(1) - track_xy.X(0));
     State x0 = {track_xy.X(0),track_xy.Y(0),phi_0,jsonConfig["v0"],0,0,0,0.5,0,jsonConfig["v0"]};
+
+    // create obstacles
+    std::vector<Obstacle> obstacles;
+    Obstacle obs1(State{track_xy.X(100), track_xy.Y(100)});
+    obstacles.emplace_back(obs1);
+
     for(int i=0;i<jsonConfig["n_sim"];i++)
     {
         MPCReturn mpc_sol = mpc.runMPC(x0);
         x0 = integrator.simTimeStep(x0,mpc_sol.u0,jsonConfig["Ts"]);
         log.push_back(mpc_sol);
+        // process any dynamic obstacles
+        for (auto& ob : obstacles){
+            if (ob.type() == Obstacle::ObstacleType::kDynamic){
+                // move any dynamic obstacles
+                ob.set_position(0, 0); // TODO: simulate moving obstacle in some way
+            }
+        }
     }
-    plotter.plotRun(log,track_xy);
-    plotter.plotSim(log,track_xy);
+    plotter.plotRun(log,track_xy, obstacles);
+    plotter.plotSim(log,track_xy, obstacles);
 
     double mean_time = 0.0;
     double max_time = 0.0;

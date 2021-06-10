@@ -34,7 +34,8 @@ add_executable(MPCC
         Params/track.cpp
         Params/track.h
         Plotting/plotting.cpp
-        Plotting/plotting.h)
+        Plotting/plotting.h
+        Obstacle/Obstacle.h)
 
 find_package(Python COMPONENTS Development)
 target_include_directories(MPCC PRIVATE ${Python_INCLUDE_DIRS})
